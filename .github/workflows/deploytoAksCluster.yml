@@ -13,22 +13,22 @@ jobs:
     - name: Create ACR
       id: create-acr
       run: |
-        az acr create -n deploymentcenteracr -g aksrg --location "South Central US" --sku Standard --admin-enabled
-        echo "::set-output name=acr_username::`az acr credential show -n deploymentcenteracr --query username | xargs`"
-        echo "::set-output name=acr_password::`az acr credential show -n deploymentcenteracr --query passwords[0].value | xargs`"
-        echo "::add-mask::`az acr credential show -n deploymentcenteracr --query passwords[0].value | xargs`"
+        az acr create -n gethuacr23 -g aksrg --location "EastUS" --sku Standard --admin-enabled
+        echo "::set-output name=acr_username::`az acr credential show -n gethuacr23 --query username | xargs`"
+        echo "::set-output name=acr_password::`az acr credential show -n gethuacr23 --query passwords[0].value | xargs`"
+        echo "::add-mask::`az acr credential show -n gethuacr23 --query passwords[0].value | xargs`"
 
     - uses: azure/docker-login@v1
       with:
-        login-server: deploymentcenteracr.azurecr.io
+        login-server: gethuacr23.azurecr.io
         username: ${{ steps.create-acr.outputs.acr_username }}
         password: ${{ steps.create-acr.outputs.acr_password }}
 
     - name: Build and push image to ACR
       id: build-image
       run: |
-        docker build "$GITHUB_WORKSPACE/azure-vote" -f  "azure-vote/Dockerfile" -t deploymentcenteracr.azurecr.io/deploymentcentertest:${{ github.sha }} --label dockerfile-path=azure-vote/Dockerfile
-        docker push deploymentcenteracr.azurecr.io/deploymentcentertest:${{ github.sha }}
+        docker build "$GITHUB_WORKSPACE/azure-vote" -f  "azure-vote/Dockerfile" -t gethuacr23.azurecr.io/deploymentcentertest:${{ github.sha }} --label dockerfile-path=azure-vote/Dockerfile
+        docker push gethuacr23.azurecr.io/deploymentcentertest:${{ github.sha }}
     
     - uses: azure/k8s-set-context@v1
       id: login
@@ -46,7 +46,7 @@ jobs:
     - uses: azure/k8s-create-secret@v1
       with:
         namespace: deploymentcentertestbe49
-        container-registry-url: deploymentcenteracr.azurecr.io
+        container-registry-url: gethuacr23.azurecr.io
         container-registry-username: ${{ steps.create-acr.outputs.acr_username }}
         container-registry-password: ${{ steps.create-acr.outputs.acr_password }}
         secret-name: deploymentcedockerauth
@@ -58,6 +58,6 @@ jobs:
           manifests/deployment.yml
           manifests/service.yml
         images: |
-          deploymentcenteracr.azurecr.io/deploymentcentertest:${{ github.sha }}
+          gethuacr23.azurecr.io/deploymentcentertest:${{ github.sha }}
         imagepullsecrets: |
           deploymentcedockerauth   
