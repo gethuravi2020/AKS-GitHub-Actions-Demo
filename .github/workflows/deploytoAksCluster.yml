@@ -55,8 +55,7 @@ jobs:
       with:
         namespace: deploymentcentertestbe49
         manifests: |
-          manifests/deployment.yml
-          manifests/service.yml
+          manifests/azure-vote-all-in-one-redis.yaml       
         images: |
           gethuacr23.azurecr.io/deploymentcentertest:${{ github.sha }}
         imagepullsecrets: |
